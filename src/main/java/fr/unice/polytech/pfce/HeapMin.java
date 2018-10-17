@@ -106,6 +106,10 @@ public class HeapMin {
 		return tab[i];
 	}
 	
+	public int getSize() {
+		return size;
+	}
+	
 	public int getMin() {
 		return tab[0];
 	}
