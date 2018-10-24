@@ -68,22 +68,22 @@ public class HeapMin {
 	private void percolateDown(int pos) {
 		boolean done = true;
 		int current = pos;
-		if(tab[current]>tab[leftChild(current)] && leftChild(current)!=-1) {
+		if(leftChild(current)!=-1 && tab[current]>tab[leftChild(current)]) {
 			swap(current,leftChild(current));
 			done = false;
 			current = leftChild(current);
-		}else if(tab[current]>tab[rightChild(current)] && rightChild(current)!=-1) {
+		}else if(rightChild(current)!=-1 && tab[current]>tab[rightChild(current)]) {
 			swap(current,rightChild(current));
 			done = false;
 			current = rightChild(current);
 		}
 		while(!done && current!=-1) {
 			done = true;
-			if(tab[current]>tab[leftChild(current)] && leftChild(current)!=-1) {
+			if(leftChild(current)!=-1 && tab[current]>tab[leftChild(current)]) {
 				swap(current,leftChild(current));
 				done = false;
 				current = leftChild(current);
-			}else if(tab[current]>tab[rightChild(current)] && rightChild(current)!=-1) {
+			}else if(rightChild(current)!=-1 && tab[current]>tab[rightChild(current)]) {
 				swap(current,rightChild(current));
 				done = false;
 				current = rightChild(current);
@@ -122,6 +122,12 @@ public class HeapMin {
 			}
 		}
 		return max;
+	}
+	
+	public int popMin() {
+		int min = getMin();
+		remove(0);
+		return min;
 	}
 
 }
