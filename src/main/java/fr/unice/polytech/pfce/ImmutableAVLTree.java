@@ -1,472 +1,32 @@
 package fr.unice.polytech.pfce;
 
-import java.util.Arrays;
+abstract class ImmutableAVLTree<E extends Comparable<E>> {
 
-/**
- * ImmutableAVLTree
- */
-public class ImmutableAVLTree<T extends Comparable<? super T>> implements BinaryTree<T> {
+    protected final E element;
+    protected final ImmutableAVLTree<E> left, right;
+    protected final int height;
+    public final int size;
 
-    /**
-     * AVLNode is a container class that is used to store each element
-     * (node) of an AVL tree.
-     *
-     * @author Justin Ethier
-     */
-    protected static class AVLNode<T> {
-
-        protected T  element;
-        protected AVLNode<T> left;
-        protected AVLNode<T> right;
-        protected int      height;
-
-        public AVLNode(T e){
-            this (e, null, null);
-        }
-
-        public AVLNode(T theElement, AVLNode<T> lt, AVLNode<T> rt){
-            element = theElement;
-            left = lt;
-            right = rt;
-        }
+    protected ImmutableAVLTree(E element, ImmutableAVLTree<E> left, ImmutableAVLTree<E> right, int height, int size) {
+        this.element = element;
+        this.left = left;
+        this.right = right;
+        this.height = height;
+        this.size = size;
     }
 
-    public AVLNode<T> root;
+    public abstract ImmutableAVLTree<E> add(E element);
+    public abstract Pair<E, ImmutableAVLTree<E>> pollFirst();
+    public abstract ImmutableAVLTree<E> remove(E element);
+    public abstract int index(E element);
+    public abstract int subSize(E fromElement, E toElement);
 
-    public ImmutableAVLTree(){
-        root = null;
+    public boolean checkBalanceOfTree() {
+        System.out.println(this.toString());
+        return checkBalanceOfTree(this);
     }
 
-    // https://www.geeksforgeeks.org/sorted-array-to-balanced-bst/
-    public ImmutableAVLTree(T[] values) {
-
-        Arrays.sort(values);
-
-        root = fromSortedArray(values, 0, values.length - 1);
-        countInsertions = 0;
-        countSingleRotations = 0;
-        countDoubleRotations = 0;
-    }
-
-    private AVLNode<T> fromSortedArray(T[] arr, int start, int end) {
-
-        if(start > end) {
-            return null;
-        }
-
-        int mid = (start+end) / 2;
-        AVLNode<T> node = new AVLNode<>(arr[mid]);
-        countInsertions++;
-
-        /* Recursively construct the left subtree and make it 
-         left child of root */
-        node.left = fromSortedArray(arr, start, mid - 1); 
-
-         /* Recursively construct the right subtree and make it 
-          right child of root */
-        node.right = fromSortedArray(arr, mid + 1, end); 
-
-        return node; 
-    }
-
-    /**
-     * Determine the height of the given node.
-     *
-     * @param t Node
-     * @return Height of the given node.
-     */
-    public int height (AVLNode<T> t){
-        return t == null ? -1 : t.height;
-    }
-
-    /**
-     * Find the maximum value among the given numbers.
-     *
-     * @param a First number
-     * @param b Second number
-     * @return Maximum value
-     */
-    public int max (int a, int b){
-        if (a > b)
-            return a;
-        return b;
-    }
-
-    /**
-     * Insert an element into the tree.
-     *
-     * @param x Element to insert into the tree
-     * @return True - Success, the Element was added.
-     *         False - Error, the element was a duplicate.
-     */
-    @Override
-    public boolean insert(T x){
-        try {
-            root = insert (x, root);
-
-            countInsertions++;
-            return true;
-        } catch(Exception e){ // TODO: catch a DuplicateValueException instead!
-            return false;
-        }
-    }
-
-    /**
-     * Internal method to perform an actual insertion.
-     *
-     * @param x Element to add
-     * @param t Root of the tree
-     * @return New root of the tree
-     * @throws Exception
-     */
-    protected AVLNode<T> insert (T x, AVLNode<T> t) throws Exception{
-        if (t == null)
-            t = new AVLNode<T>(x);
-        else if (x.compareTo (t.element) < 0){
-            t.left = insert (x, t.left);
-
-            if (height (t.left) - height (t.right) == 2){
-                if (x.compareTo (t.left.element) < 0){
-                    t = rotateWithLeftChild (t);
-                    countSingleRotations++;
-                }
-                else {
-                    t = doubleWithLeftChild (t);
-                    countDoubleRotations++;
-                }
-            }
-        }
-        else if (x.compareTo (t.element) > 0){
-            t.right = insert (x, t.right);
-
-            if ( height (t.right) - height (t.left) == 2)
-                if (x.compareTo (t.right.element) > 0){
-                    t = rotateWithRightChild (t);
-                    countSingleRotations++;
-                }
-                else{
-                    t = doubleWithRightChild (t);
-                    countDoubleRotations++;
-                }
-        }
-        else {
-            throw new Exception("Attempting to insert duplicate value");
-        }
-
-        t.height = max (height (t.left), height (t.right)) + 1;
-        return t;
-    }
-
-    /**
-     * Rotate binary tree node with left child.
-     * For AVL trees, this is a single rotation for case 1.
-     * Update heights, then return new root.
-     *
-     * @param k2 Root of tree we are rotating
-     * @return New root
-     */
-    protected AVLNode<T> rotateWithLeftChild (AVLNode<T> k2){
-        AVLNode<T> k1 = k2.left;
-
-        k2.left = k1.right;
-        k1.right = k2;
-
-        k2.height = max (height (k2.left), height (k2.right)) + 1;
-        k1.height = max (height (k1.left), k2.height) + 1;
-
-        return (k1);
-    }
-
-    /**
-     * Double rotate binary tree node: first left child
-     * with its right child; then node k3 with new left child.
-     * For AVL trees, this is a double rotation for case 2.
-     * Update heights, then return new root.
-     *
-     * @param k3 Root of tree we are rotating
-     * @return New root
-     */
-    protected AVLNode<T> doubleWithLeftChild (AVLNode<T> k3){
-        k3.left = rotateWithRightChild (k3.left);
-        return rotateWithLeftChild (k3);
-    }
-
-    /**
-     * Rotate binary tree node with right child.
-     * For AVL trees, this is a single rotation for case 4.
-     * Update heights, then return new root.
-     *
-     * @param k1 Root of tree we are rotating.
-     * @return New root
-     */
-    protected AVLNode<T> rotateWithRightChild (AVLNode<T> k1){
-        AVLNode<T> k2 = k1.right;
-
-        k1.right = k2.left;
-        k2.left = k1;
-
-        k1.height = max (height (k1.left), height (k1.right)) + 1;
-        k2.height = max (height (k2.right), k1.height) + 1;
-
-        return (k2);
-    }
-
-    /**
-     * Double rotate binary tree node: first right child
-     * with its left child; then node k1 with new right child.
-     * For AVL trees, this is a double rotation for case 3.
-     * Update heights, then return new root.
-     *
-     * @param k1 Root of tree we are rotating
-     * @return New root
-     */
-    protected AVLNode<T> doubleWithRightChild (AVLNode<T> k1){
-        k1.right = rotateWithLeftChild (k1.right);
-        return rotateWithRightChild (k1);
-    }
-
-
-    /**
-     * Serialize the tree to a string using an infix traversal.
-     *
-     * In other words, the tree items will be serialized in numeric order.
-     *
-     * @return String representation of the tree
-     */
-    public String serializeInfix(){
-        StringBuilder str = new StringBuilder();
-        serializeInfix (root, str, " ");
-        return str.toString();
-    }
-
-    /**
-     * Internal method to infix-serialize a tree.
-     *
-     * @param t    Tree node to traverse
-     * @param str  Accumulator; string to keep appending items to.
-     */
-    protected void serializeInfix(AVLNode<T> t, StringBuilder str, String sep){
-        if (t != null){
-            serializeInfix (t.left, str, sep);
-            str.append(t.element.toString());
-            str.append(sep);
-            serializeInfix (t.right, str, sep);
-        }
-    }
-
-    /**
-     * Serialize the tree to a string using a prefix traversal.
-     *
-     * In other words, the tree items will be serialized in the order that
-     * they are stored within the tree.
-     *
-     * @return String representation of the tree
-     */
-    public String serializePrefix(){
-        StringBuilder str = new StringBuilder();
-        serializePrefix (root, str, " ");
-        return str.toString();
-    }
-
-    /**
-     * Internal method to prefix-serialize a tree.
-     *
-     * @param t    Tree node to traverse
-     * @param str  Accumulator; string to keep appending items to.
-     */
-    private void serializePrefix (AVLNode<T> t, StringBuilder str, String sep){
-        if (t != null){
-            str.append(t.element.toString());
-            str.append(sep);
-            serializePrefix (t.left, str, sep);
-            serializePrefix (t.right, str, sep);
-        }
-    }
-
-    /**
-     * Deletes all nodes from the tree.
-     *
-     */
-    public void makeEmpty(){
-        root = null;
-    }
-
-    /**
-     * Determine if the tree is empty.
-     *
-     * @return True if the tree is empty
-     */
-    @Override
-    public boolean isEmpty(){
-        return (root == null);
-    }
-
-
-
-    /**
-     * Find the smallest item in the tree.
-     * @return smallest item or null if empty.
-     */
-    @Override
-    public T findMin()
-    {
-        if( isEmpty( ) ) return null;
-
-        return findMin( root ).element;
-    }
-
-    /**
-     * Find the largest item in the tree.
-     * @return the largest item of null if empty.
-     */
-    @Override
-    public T findMax()
-    {
-        if( isEmpty( ) ) return null;
-        return findMax( root ).element;
-    }
-
-    /**
-     * Internal method to find the smallest item in a subtree.
-     * @param t the node that roots the tree.
-     * @return node containing the smallest item.
-     */
-    private AVLNode<T> findMin(AVLNode<T> t)
-    {
-        if( t == null )
-            return t;
-
-        while( t.left != null )
-            t = t.left;
-        return t;
-    }
-
-    /**
-     * Internal method to find the largest item in a subtree.
-     * @param t the node that roots the tree.
-     * @return node containing the largest item.
-     */
-    private AVLNode<T> findMax(AVLNode<T> t )
-    {
-        if( t == null )
-            return t;
-
-        while( t.right != null )
-            t = t.right;
-        return t;
-    }
-
-
-// A version of remove from http://www.dreamincode.net/forums/topic/214510-working-example-of-avl-tree-remove-method/
-// but it needs some attention and does not appear to be 100% correct
-
-    /**
-     * Remove from the tree. Nothing is done if x is not found.
-     * @param x the item to remove.
-     */
-    @Override
-    public void remove(T x) {
-        root = remove(x, root);
-    }
-
-    public AVLNode<T> remove(T x, AVLNode<T> t) {
-        if (t==null)    {
-            System.out.println("Sorry but you're mistaken, " + t + " doesn't exist in this tree :)\n");
-            return null;
-        }
-        System.out.println("Remove starts... " + t.element + " and " + x);
-
-        if (x.compareTo(t.element) < 0 ) {
-            t.left = remove(x,t.left);
-            int l = t.left != null ? t.left.height : 0;
-
-            if((t.right != null) && (t.right.height - l >= 2)) {
-                int rightHeight = t.right.right != null ? t.right.right.height : 0;
-                int leftHeight = t.right.left != null ? t.right.left.height : 0;
-
-                if(rightHeight >= leftHeight)
-                    t = rotateWithLeftChild(t);
-                else
-                    t = doubleWithRightChild(t);
-            }
-        }
-        else if (x.compareTo(t.element) > 0) {
-            t.right = remove(x,t.right);
-            int r = t.right != null ? t.right.height : 0;
-            if((t.left != null) && (t.left.height - r >= 2)) {
-                int leftHeight = t.left.left != null ? t.left.left.height : 0;
-                int rightHeight = t.left.right != null ? t.left.right.height : 0;
-                if(leftHeight >= rightHeight)
-                    t = rotateWithRightChild(t);
-                else
-                    t = doubleWithLeftChild(t);
-            }
-        }
-      /*
-         Here, we have ended up when we are node which shall be removed.
-         Check if there is a left-hand node, if so pick out the largest element out, and move down to the root.
-       */
-        else if(t.left != null) {
-            t.element = findMax(t.left).element;
-            remove(t.element, t.left);
-
-            if((t.right != null) && (t.right.height - t.left.height >= 2)) {
-                int rightHeight = t.right.right != null ? t.right.right.height : 0;
-                int leftHeight = t.right.left != null ? t.right.left.height : 0;
-
-                if(rightHeight >= leftHeight)
-                    t = rotateWithLeftChild(t);
-                else
-                    t = doubleWithRightChild(t);
-            }
-        }
-
-        else
-            t = (t.left != null) ? t.left : t.right;
-
-        if(t != null) {
-            int leftHeight = t.left != null ? t.left.height : 0;
-            int rightHeight = t.right!= null ? t.right.height : 0;
-            t.height = Math.max(leftHeight,rightHeight) + 1;
-        }
-        return t;
-    } //End of remove...
-
-    /**
-     * Search for an element within the tree.
-     *
-     * @param x Element to find
-     * @return True if the element is found, false otherwise
-     */
-    @Override
-    public boolean contains(T x){
-        return contains(x, root);
-    }
-
-    /**
-     * Internal find method; search for an element starting at the given node.
-     *
-     * @param x Element to find
-     * @param t Root of the tree
-     * @return True if the element is found, false otherwise
-     */
-    protected boolean contains(T x, AVLNode<T> t) {
-        if (t == null){
-            return false; // The node was not found
-
-        } else if (x.compareTo(t.element) < 0){
-            return contains(x, t.left);
-        } else if (x.compareTo(t.element) > 0){
-            return contains(x, t.right);
-        }
-
-        return true; // Can only reach here if node was found
-    }
-
-    /***********************************************************************/
-    // Diagnostic functions for the tree
-    public boolean checkBalanceOfTree(AVLNode<Integer> current) {
-
+    private boolean checkBalanceOfTree(ImmutableAVLTree current) {
         boolean balancedRight = true, balancedLeft = true;
         int leftHeight = 0, rightHeight = 0;
 
@@ -483,7 +43,7 @@ public class ImmutableAVLTree<T extends Comparable<? super T>> implements Binary
         return balancedLeft && balancedRight && Math.abs(leftHeight - rightHeight) < 2;
     }
 
-    public int getDepth(AVLNode<Integer> n) {
+    public int getDepth(ImmutableAVLTree n) {
         int leftHeight = 0, rightHeight = 0;
 
         if (n.right != null)
@@ -491,24 +51,219 @@ public class ImmutableAVLTree<T extends Comparable<? super T>> implements Binary
         if (n.left != null)
             leftHeight = getDepth(n.left);
 
-        return Math.max(rightHeight, leftHeight)+1;
+        return Math.max(rightHeight, leftHeight) + 1;
     }
 
-    public boolean checkOrderingOfTree(AVLNode<Integer> current) {
-        if(current.left != null) {
-            if(current.left.element.compareTo(current.element) > 0)
+    public boolean checkOrderingOfTree() {
+
+        return checkOrderingOfTree(this, element);
+
+    }
+
+    private boolean checkOrderingOfTree(ImmutableAVLTree current, Comparable borne) {
+        if (current.left != null) {
+            if (current.left.element.compareTo(current.element) > 0)
                 return false;
             else
-                return checkOrderingOfTree(current.left);
-        } else  if(current.right != null) {
-            if(current.right.element.compareTo(current.element) < 0)
+                return checkOrderingOfTree(current.left, current.element);
+        } else if (current.right != null) {
+            if (current.right.element.compareTo(borne) < 0 // Check upper bound
+                    && current.right.element.compareTo(current.element) < 0)
                 return false;
             else
-                return checkOrderingOfTree(current.right);
-        } else if(current.left == null && current.right == null)
+                return checkOrderingOfTree(current.right, current.element);
+        } else if (current.left == null && current.right == null)
             return true;
 
         return true;
+    }
+
+    protected abstract String toString(String indent);
+
+    public String toString() {
+        return this.toString("");
+    }
+
+}
+
+final class Pair<A, B> {
+    public final A first;
+    public final B second;
+
+    public Pair(A first, B second) {
+        this.first = first;
+        this.second = second;
+    }
+
+}
+
+final class AVLNil<E extends Comparable<E>> extends ImmutableAVLTree<E> {
+
+    public AVLNil() {
+        super(null, null, null, 0, 0);
+    }
+
+    public ImmutableAVLTree<E> add(E element) {
+        return new AVLNode<E>(element, this, this);
+    }
+
+    public Pair<E, ImmutableAVLTree<E>> pollFirst() {
+        return new Pair<E, ImmutableAVLTree<E>>(null, this);
+    }
+
+    public ImmutableAVLTree<E> remove(E element) {
+        return this;
+    }
+
+    public int index(E element) {
+        return 0;
+    }
+
+    public int subSize(E fromElement, E toElement) {
+        return 0;
+    }
+
+    protected String toString(String indent) {
+        return indent + "$\n";
+    }
+
+}
+
+final class AVLNode<E extends Comparable<E>> extends ImmutableAVLTree<E> {
+
+    public AVLNode(E element, ImmutableAVLTree<E> left, ImmutableAVLTree<E> right) {
+        super(element, left, right, Math.max(left.height, right.height)+1, left.size+right.size+1);
+    }
+
+    private ImmutableAVLTree<E> balanceLeft(E element, ImmutableAVLTree<E> left, ImmutableAVLTree<E> right) {
+        if (left.height <= right.height+1) {
+            return new AVLNode<E>(element, left, right);
+        }
+        else if (left.left.height > right.height) {
+            return new AVLNode<E>
+                    ( left.element
+                            , left.left
+                            , new AVLNode<E>(element, left.right, right)
+                    )
+                    ;
+        }
+        else {
+            return new AVLNode<E>
+                    ( left.right.element
+                            , new AVLNode<E>(left.element, left.left, left.right.left)
+                            , new AVLNode<E>(element, left.right.right, right)
+                    )
+                    ;
+        }
+    }
+
+    private ImmutableAVLTree<E> balanceRight(E element, ImmutableAVLTree<E> left, ImmutableAVLTree<E> right) {
+        if (left.height+1 >= right.height) {
+            return new AVLNode<E>(element, left, right);
+        }
+        else if (left.height < right.right.height) {
+            return new AVLNode<E>
+                    ( right.element
+                            , new AVLNode<E>(element, left, right.left)
+                            , right.right
+                    )
+                    ;
+        }
+        else {
+            return new AVLNode<E>
+                    ( right.left.element
+                            , new AVLNode<E>(element, left, right.left.left)
+                            , new AVLNode<E>(right.element, right.left.right, right.right)
+                    )
+                    ;
+        }
+    }
+
+    public ImmutableAVLTree<E> add(E element) {
+        int c = element.compareTo(this.element);
+        if (c < 0) {
+            ImmutableAVLTree<E> left = this.left.add(element);
+            if (left != this.left) {
+                return balanceLeft(this.element, left, this.right);
+            }
+        }
+        else if (c > 0) {
+            ImmutableAVLTree<E> right = this.right.add(element);
+            if (right != this.right) {
+                return balanceRight(this.element, this.left, right);
+            }
+        }
+        return this;
+    }
+
+    public Pair<E, ImmutableAVLTree<E>> pollFirst() {
+        if (this.left instanceof AVLNil) {
+            return new Pair<E, ImmutableAVLTree<E>>
+                    ( this.element
+                            , this.right
+                    )
+                    ;
+        } else {
+            Pair<E, ImmutableAVLTree<E>> p = this.left.pollFirst();
+            return new Pair<E, ImmutableAVLTree<E>>
+                    ( p.first
+                            , balanceRight(this.element, p.second, this.right)
+                    )
+                    ;
+        }
+    }
+
+    public ImmutableAVLTree<E> remove(E element) {
+        int c = element.compareTo(this.element);
+        if (c < 0) {
+            ImmutableAVLTree<E> left = this.left.remove(element);
+            if (left != this.left) {
+                return balanceRight(this.element, left, this.right);
+            }
+        }
+        else if (c > 0) {
+            ImmutableAVLTree<E> right = this.right.remove(element);
+            if (right != this.right) {
+                return balanceLeft(this.element, this.left, right);
+            }
+        }
+        else if (this.right instanceof AVLNil) {
+            return this.left;
+        }
+        else {
+            Pair<E, ImmutableAVLTree<E>> p = this.right.pollFirst();
+            return balanceLeft(p.first, this.left, p.second);
+        }
+        return this;
+    }
+
+    public int index(E element) {
+        if (element.compareTo(this.element) <= 0) {
+            return this.left.index(element);
+        }
+        else {
+            return this.left.size+1+this.right.index(element);
+        }
+    }
+
+    public int subSize(E fromElement, E toElement) {
+        if (toElement.compareTo(this.element) <= 0) {
+            return this.left.subSize(fromElement, toElement);
+        }
+        else if (fromElement.compareTo(this.element) > 0) {
+            return this.right.subSize(fromElement, toElement);
+        }
+        else {
+            return index(toElement)-index(fromElement);
+        }
+    }
+
+    protected String toString(String indent) {
+        String indent1 = indent+"  ";
+        return this.left.toString(indent1)
+                + indent + this.element + "\n"
+                + this.right.toString(indent1)
+                ;
     }
 
 }

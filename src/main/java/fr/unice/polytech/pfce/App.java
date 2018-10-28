@@ -11,11 +11,11 @@ public class App
 
     public static void main( String[] args )
     {
-        AVLTree<Integer> t = new AVLTree<>(values);
+        /*AVLTree<Integer> t = new AVLTree<>(values);
         System.out.println ("Infix Traversal:");
         System.out.println(t.serializeInfix());
 
         System.out.println ("Prefix Traversal:");
-        System.out.println(t.serializePrefix());
+        System.out.println(t.serializePrefix());*/
     }
 }
