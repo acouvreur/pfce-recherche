@@ -14,7 +14,7 @@ public class App
         Random r = new Random();
         long timeMs1,timeMs2,timeMeanInsert,timeMeanDelete;
         //Mutable Heap test
-        System.out.println("Mutable Heap test");
+        
         HeapMin heap;
         long size;
         for(int i=1;i<=20;i++) {
@@ -38,12 +38,13 @@ public class App
         	}
         	timeMeanInsert=timeMeanInsert/100;
         	timeMeanDelete=timeMeanDelete/100;
-        	System.out.println("Mean time for x^"+i+" insertion in heap : "+timeMeanInsert+"ns");
-        	System.out.println("Mean time for x^"+i+" deletion in heap  : "+timeMeanDelete+"ns");
+        	System.out.println("Array Size;Heap Insert(ns)");
+        	System.out.println(size+";"+timeMeanInsert);
+        	System.out.println("Array Size;Heap Delete(ns)");
+        	System.out.println(size+";"+timeMeanDelete);
         }
         /*
         AVLTree avlTree;
-        System.out.println("Mutable AVLTree test");
         for(int i=1;i<=20;i++) {
         	size = (long) Math.pow(2, i);
         	timeMeanInsert=0;
@@ -65,11 +66,12 @@ public class App
         	}
         	timeMeanInsert=timeMeanInsert/100;
         	timeMeanDelete=timeMeanDelete/100;
-        	System.out.println("Mean time for x^"+i+" insertion in AVLTree : "+timeMeanInsert+"ns");
-        	System.out.println("Mean time for x^"+i+" deletion in AVLTree  : "+timeMeanDelete+"ns");
+        	System.out.println("Array Size;AVLTree Insert(ns)");
+        	System.out.println(size+";"+timeMeanInsert);
+        	System.out.println("Array Size;AVLTree Delete(ns)");
+        	System.out.println(size+";"+timeMeanDelete);
         }
         ImmutableAVLTree<Integer> immutableAVLTree;
-        System.out.println("Immutable AVLTree test");
         for(int i=1;i<=20;i++) {
         	size = (long) Math.pow(2, i);
         	timeMeanInsert=0;
@@ -89,14 +91,13 @@ public class App
         		timeMs2 = System.nanoTime();
         		timeMeanDelete+=timeMs2-timeMs1;
         	}
-        	timeMeanInsert=timeMeanInsert/100;
-        	timeMeanDelete=timeMeanDelete/100;
-        	System.out.println("Mean time for x^"+i+" insertion in Immutable AVLTree : "+timeMeanInsert+"ns");
-        	System.out.println("Mean time for x^"+i+" deletion in Immutable AVLTree  : "+timeMeanDelete+"ns");
+        	System.out.println("Array Size;ImmutableAVLTree Insert(ns)");
+        	System.out.println(size+";"+timeMeanInsert);
+        	System.out.println("Array Size;ImmutableAVLTree Delete(ns)");
+        	System.out.println(size+";"+timeMeanDelete);
         }
         */
         RedBlackTree<Integer> redBlackTree;
-        System.out.println("Mutable RedBlackTree test");
         for(int i=1;i<=20;i++) {
         	size = (long) Math.pow(2, i);
         	timeMeanInsert=0;
@@ -118,8 +119,10 @@ public class App
         	}
         	timeMeanInsert=timeMeanInsert/100;
         	timeMeanDelete=timeMeanDelete/100;
-        	System.out.println("Mean time for x^"+i+" insertion in RedBlackTree : "+timeMeanInsert+"ns");
-        	System.out.println("Mean time for x^"+i+" deletion in RedBlackTree  : "+timeMeanDelete+"ns");
+        	System.out.println("Array Size;RedBlackTree Insert(ns)");
+        	System.out.println(size+";"+timeMeanInsert);
+        	System.out.println("Array Size;RedBlackTree Delete(ns)");
+        	System.out.println(size+";"+timeMeanDelete);
         }
     }
 }
