@@ -12,9 +12,9 @@ public class HeapMinImmutable {
 		size=-1;
 	}
 	
-	private HeapMinImmutable(int size) {
-		tab = new int[size+1];
-		this.size=size;
+	public HeapMinImmutable(int[] tab) {
+		this.tab = tab;
+		size=tab.length-1;
 	}
 	
 	private int parent(int i) {
@@ -39,10 +39,8 @@ public class HeapMinImmutable {
 	}
 	
 	public HeapMinImmutable insert(int n) {
-		HeapMinImmutable heap = new HeapMinImmutable(size+1);
-		for(int i=0;i<=size;i++) {
-			heap.tab[i]=tab[i];
-		}
+		HeapMinImmutable heap = new HeapMinImmutable(Arrays.copyOf(tab, size+2));
+
 		heap.tab[heap.size]=n;
 		heap.percolateUp(heap.size);
 		return heap;
@@ -98,19 +96,14 @@ public class HeapMinImmutable {
 	
 	public HeapMinImmutable remove(int i) {
 		if(i==size) {
-			HeapMinImmutable heap = new HeapMinImmutable(size-1);
+			HeapMinImmutable heap = new HeapMinImmutable(Arrays.copyOf(tab, size));
 			for(int y=0;y<size;y++) {
 				heap.tab[y]=tab[y];
 			}
 			return heap;
 		}
-		HeapMinImmutable heap = new HeapMinImmutable(size-1);
-		for(int y=0;y<size;y++) {
-			if(y!=i)
-				heap.tab[y]=tab[y];
-			else
-				heap.tab[y]=tab[size];
-		}
+		HeapMinImmutable heap = new HeapMinImmutable(Arrays.copyOf(tab, size));
+		heap.tab[i]=tab[size];
 		heap.percolateDown(i);
 		heap.percolateUp(i);
 		return heap;

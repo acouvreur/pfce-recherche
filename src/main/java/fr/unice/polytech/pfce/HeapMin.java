@@ -12,6 +12,15 @@ public class HeapMin {
 		size=-1;
 	}
 	
+	public HeapMin(int[] tab) {
+		this.tab = tab;
+		size=tab.length-1;
+		for(int i=0;i<=size;i++)
+			percolateDown(i);
+		for(int i=size;i>0;i--)
+			percolateUp(i);
+	}
+	
 	private void extendTab() {
 		tab = Arrays.copyOf(tab,tab.length+256);
 	}
@@ -98,8 +107,14 @@ public class HeapMin {
 		}
 		tab[i]=tab[size];
 		size--;
-		percolateDown(i);
 		percolateUp(i);
+		percolateDown(i);
+		if(!coherent()) {
+			for(int y=0;y<=size;y++)
+				percolateDown(y);
+			for(int y=size;y>0;y--)
+				percolateUp(y);
+		}
 	}
 	
 	public int get(int i) {
@@ -128,6 +143,14 @@ public class HeapMin {
 		int min = getMin();
 		remove(0);
 		return min;
+	}
+	
+	public boolean coherent() {
+		for(int i=1;i<size;i++) {
+			if(tab[i]<tab[parent(i)])
+				return false;
+		}
+		return true;
 	}
 
 }

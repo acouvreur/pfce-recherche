@@ -16,6 +16,7 @@ public class HeapMinTest {
 			assertEquals(i, heapMin.getMin());
 		}
 		assertEquals(9, heapMin.getMax());
+		assertTrue(heapMin.coherent());
 	}
 	
 	@Test
@@ -27,6 +28,7 @@ public class HeapMinTest {
 		}
 		heapMin.insert(Integer.MIN_VALUE);
 		assertEquals(Integer.MIN_VALUE, heapMin.getMin());
+		assertTrue(heapMin.coherent());
 	}
 	
 	@Test
@@ -37,8 +39,24 @@ public class HeapMinTest {
 		for(int i = 10; i>=1;i--) {
 			heapMin.insert(r.nextInt()+1);
 		}
+		assertTrue(heapMin.coherent());
 		heapMin.remove(0);
 		assertNotEquals(Integer.MIN_VALUE, heapMin.getMin());
+		assertTrue(heapMin.coherent());
+
+	}
+	
+	
+	@Test
+	public void testFromArray() {
+		HeapMin heapMin;
+		Random r = new Random();
+		int[] tab= new int[10];
+		for(int i=0;i<10;i++) {
+			tab[i]=i;
+		}
+		heapMin = new HeapMin(tab);
+		assertTrue(heapMin.coherent());
 	}
 
 }
