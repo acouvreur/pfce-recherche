@@ -1,15 +1,13 @@
 package fr.unice.polytech.pfce;
 
-public interface BinaryTree<T extends Comparable<? super T>> {
-    boolean insert (T x);
+public interface BinaryTree<T extends Comparable<T>> {
 
-    boolean isEmpty();
+    BinaryTree<T> insert(T data);
+    BinaryTree<T> remove(T data);
+    BinaryTree<T> removeMin();
 
     T findMin();
-
     T findMax();
+    T find(T data);
 
-    void remove(T x);
-
-    boolean contains(T x);
 }

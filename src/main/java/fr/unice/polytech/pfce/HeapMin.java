@@ -2,7 +2,7 @@ package fr.unice.polytech.pfce;
 
 import java.util.Arrays;
 
-public class HeapMin {
+public class HeapMin implements BinaryTree<Integer> {
 	
 	int[] tab;
 	int size;
@@ -10,6 +10,15 @@ public class HeapMin {
 	public HeapMin() {
 		tab = new int[256];
 		size=-1;
+	}
+
+	public HeapMin(Integer[] tab) {
+		this.tab = Arrays.stream(tab).mapToInt(Integer::intValue).toArray();
+		size=tab.length-1;
+		for(int i=0;i<=size;i++)
+			percolateDown(i);
+		for(int i=size;i>0;i--)
+			percolateUp(i);
 	}
 	
 	private void extendTab() {
@@ -36,11 +45,12 @@ public class HeapMin {
 		return 2*i+1;
 	}
 	
-	public void insert(int n) {
+	public BinaryTree<Integer> insert(Integer n) {
 		size++;
 		if(size>=tab.length) {extendTab();}
 		tab[size]=n;
 		percolateUp(size);
+		return this;
 	}
 	private void swap(int i, int y) {
 		int tmp = tab[i];
@@ -90,31 +100,41 @@ public class HeapMin {
 			}
 		}
 	}
-	
-	public void remove(int i) {
+
+	@Override
+	public BinaryTree<Integer> remove(Integer i) {
 		if(i==size) {
 			size--;
-			return;
+			return this;
 		}
 		tab[i]=tab[size];
 		size--;
 		percolateDown(i);
 		percolateUp(i);
+		return this;
 	}
-	
-	public int get(int i) {
+
+    @Override
+    public BinaryTree<Integer> removeMin() {
+	    remove(0);
+        return this;
+    }
+
+    public Integer find(Integer i) {
 		return tab[i];
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
-	
-	public int getMin() {
+
+	@Override
+	public Integer findMin() {
 		return tab[0];
 	}
-	
-	public int getMax() {
+
+	@Override
+	public Integer findMax() {
 		int max=Integer.MIN_VALUE;
 		for (int i=0;i<=size;i++) {
 			if(tab[i]>max) {
@@ -125,7 +145,7 @@ public class HeapMin {
 	}
 	
 	public int popMin() {
-		int min = getMin();
+		int min = findMin();
 		remove(0);
 		return min;
 	}

@@ -1,31 +1,32 @@
-package fr.unice.polytech.pfce;
+package fr.unice.polytech.pfce.btree;
 
 import static org.junit.Assert.assertTrue;
+
+import fr.unice.polytech.pfce.RedBlackBST;
+import fr.unice.polytech.pfce.ShuffleArray;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
  * AVLTreeTest
  */
-public class AVLTreeTest {
+public class RedBlackTreeTest {
 
-    private AVLTree t;
-    private final int[] values = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    private RedBlackBST<Integer> t;
+    private final int[] values = new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
     @Before
     public void setUp() {
-        t = new AVLTree();
+        t = new RedBlackBST<>();
     }
 
     @After
     public void checkValidity() {
-
-        if(t.root == null) return;
-
-        assertTrue("Tree should be balanced", t.checkBalanceOfTree());
-        assertTrue("Tree should be ordered", t.checkOrderingOfTree());
+        assertTrue(t.check());
     }
 
     @Test
@@ -33,9 +34,9 @@ public class AVLTreeTest {
         assertTrue(t.isEmpty());
     }
 
-    @Test 
+    @Test
     public void createTreeFromInput() {
-        t = new AVLTree(values);
+        t = new RedBlackBST<>(Arrays.stream( values ).boxed().toArray( Integer[]::new ));
     }
 
     @Test
@@ -54,12 +55,12 @@ public class AVLTreeTest {
             t.insert(a[i]);
             checkValidity();
         }
-        
+
     }
 
     @Test
     public void removeValue() {
-        int n = 1000;
+        int n = 10;
         int[] a = new int[n];
 
         for (int i = 0; i < n; ++i) {
